@@ -1,23 +1,54 @@
-import { GetServerSideProps, NextPage } from 'next';
+import { NextPage } from 'next';
 import Head from 'next/head';
-import { getStory } from '../../services/hackerNewsService';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { getStory, HNStory } from '../../services/hackerNewsService';
 import {
   convertToXiaohongshu,
   XiaohongshuPost,
 } from '../../services/conversionService';
 
-interface PostPageProps {
-  post: XiaohongshuPost | null;
-  error?: string;
-}
+const PostPage: NextPage = () => {
+  const router = useRouter();
+  const { id } = router.query;
+  const [post, setPost] = useState<XiaohongshuPost | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const PostPage: NextPage<PostPageProps> = ({ post, error }) => {
+  useEffect(() => {
+    const fetchPost = async () => {
+      if (typeof id !== 'string') return;
+
+      setLoading(true);
+      try {
+        const story = await getStory(Number(id));
+        if (story) {
+          const convertedPost = convertToXiaohongshu(story);
+          setPost(convertedPost);
+        } else {
+          setError('文章未找到');
+        }
+      } catch (err) {
+        console.error('Error fetching story:', err);
+        setError('获取文章时发生错误');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [id]);
+
+  if (loading) {
+    return <div className="container mx-auto px-4 py-8">加载中...</div>;
+  }
+
   if (error) {
     return <div className="container mx-auto px-4 py-8">错误: {error}</div>;
   }
 
   if (!post) {
-    return <div className="container mx-auto px-4 py-8">加载中...</div>;
+    return <div className="container mx-auto px-4 py-8">文章未找到</div>;
   }
 
   return (
@@ -33,6 +64,7 @@ const PostPage: NextPage<PostPageProps> = ({ post, error }) => {
 
         <div className="card p-6">
           <p className="whitespace-pre-line mb-4">{post.content}</p>
+          {post.text && <p className="whitespace-pre-line mb-4">{post.text}</p>}
           <div className="mb-4">
             {post.tags.map((tag, index) => (
               <span
@@ -50,37 +82,6 @@ const PostPage: NextPage<PostPageProps> = ({ post, error }) => {
       </main>
     </div>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const id = context.params?.id;
-  if (typeof id !== 'string') {
-    return { props: { post: null, error: '无效的文章ID' } };
-  }
-
-  try {
-    const story = await Promise.race([
-      getStory(parseInt(id, 10)),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('请求超时')), 5000)
-      ),
-    ]);
-
-    if (!story) {
-      return { props: { post: null, error: '文章未找到' } };
-    }
-
-    const post = convertToXiaohongshu(story);
-    return { props: { post } };
-  } catch (error) {
-    console.error('Error fetching story:', error);
-    return {
-      props: {
-        post: null,
-        error: error instanceof Error ? error.message : '获取文章时发生错误',
-      },
-    };
-  }
 };
 
 export default PostPage;

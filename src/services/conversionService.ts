@@ -6,6 +6,7 @@ export interface XiaohongshuPost {
   content: string;
   tags: string[];
   imageDescription: string;
+  text?: string;
 }
 
 const translateToChineseSimple = (text: string): string => {
@@ -24,6 +25,7 @@ export const convertToXiaohongshu = (story: HNStory): XiaohongshuPost => {
     content,
     tags,
     imageDescription,
+    text: story.text,
   };
 };
 

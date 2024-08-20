@@ -9,6 +9,7 @@ export interface HNStory {
   by: string;
   time: number;
   score: number;
+  text?: string;
 }
 
 const axiosInstance = axios.create({
@@ -57,5 +58,11 @@ export const getStory = async (id: number): Promise<HNStory | null> => {
   } catch (error) {
     console.error(`Error fetching story ${id}:`, error);
     return null;
+  }
+};
+
+export const preloadStory = (id: number) => {
+  if (!cachedStories[id]) {
+    getStory(id).catch(console.error);
   }
 };
