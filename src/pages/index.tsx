@@ -1,19 +1,66 @@
-import type { NextPage, GetServerSideProps } from 'next';
+import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getTopStories, HNStory } from '../services/hackerNewsService';
 import {
   convertToXiaohongshu,
   XiaohongshuPost,
 } from '../services/conversionService';
 
-interface HomeProps {
-  convertedPosts: XiaohongshuPost[];
-}
+const ITEMS_PER_PAGE = 10;
 
-const Home: NextPage<HomeProps> = ({ convertedPosts }) => {
+const Home: NextPage = () => {
+  const [convertedPosts, setConvertedPosts] = useState<XiaohongshuPost[]>([]);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const router = useRouter();
+  const loader = useRef<HTMLDivElement>(null);
+
+  const loadMorePosts = useCallback(async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    try {
+      const newStories = await getTopStories(
+        ITEMS_PER_PAGE,
+        page * ITEMS_PER_PAGE
+      );
+      if (newStories.length === 0) {
+        setHasMore(false);
+      } else {
+        const newPosts = newStories.map((story) => convertToXiaohongshu(story));
+        setConvertedPosts((prev) => [...prev, ...newPosts]);
+        setPage((prev) => prev + 1);
+      }
+    } catch (error) {
+      console.error('Error loading more posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, loading, hasMore]);
+
+  useEffect(() => {
+    loadMorePosts();
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMorePosts();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (loader.current) {
+      observer.observe(loader.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loadMorePosts]);
 
   const handlePostClick = (postId: number) => {
     router.prefetch(`/post/${postId}`);
@@ -55,22 +102,14 @@ const Home: NextPage<HomeProps> = ({ convertedPosts }) => {
             </Link>
           ))}
         </div>
+        {hasMore && (
+          <div ref={loader} className="text-center py-4">
+            {loading ? '加载中...' : '下拉加载更多'}
+          </div>
+        )}
       </main>
     </div>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async () => {
-  try {
-    const topStories = await getTopStories(10);
-    const convertedPosts = topStories.map((story) =>
-      convertToXiaohongshu(story)
-    );
-    return { props: { convertedPosts } };
-  } catch (error) {
-    console.error('Error fetching stories:', error);
-    return { props: { convertedPosts: [] } };
-  }
 };
 
 export default Home;
