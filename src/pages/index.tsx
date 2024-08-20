@@ -1,5 +1,4 @@
-import type { NextPage } from 'next';
-import { useState, useEffect } from 'react';
+import type { NextPage, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -9,19 +8,12 @@ import {
   XiaohongshuPost,
 } from '../services/conversionService';
 
-const Home: NextPage = () => {
-  const [convertedPosts, setConvertedPosts] = useState<XiaohongshuPost[]>([]);
+interface HomeProps {
+  convertedPosts: XiaohongshuPost[];
+}
+
+const Home: NextPage<HomeProps> = ({ convertedPosts }) => {
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchAndConvertStories = async () => {
-      const topStories = await getTopStories(10);
-      const converted = topStories.map((story) => convertToXiaohongshu(story));
-      setConvertedPosts(converted);
-    };
-
-    fetchAndConvertStories();
-  }, []);
 
   const handlePostClick = (postId: number) => {
     router.prefetch(`/post/${postId}`);
@@ -66,6 +58,19 @@ const Home: NextPage = () => {
       </main>
     </div>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  try {
+    const topStories = await getTopStories(10);
+    const convertedPosts = topStories.map((story) =>
+      convertToXiaohongshu(story)
+    );
+    return { props: { convertedPosts } };
+  } catch (error) {
+    console.error('Error fetching stories:', error);
+    return { props: { convertedPosts: [] } };
+  }
 };
 
 export default Home;

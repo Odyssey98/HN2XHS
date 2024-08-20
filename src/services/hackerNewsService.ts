@@ -15,7 +15,16 @@ const axiosInstance = axios.create({
   timeout: 5000, // 5 seconds timeout
 });
 
+let cachedStories: HNStory[] = [];
+let lastFetchTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export const getTopStories = async (limit: number = 10): Promise<HNStory[]> => {
+  const now = Date.now();
+  if (cachedStories.length > 0 && now - lastFetchTime < CACHE_DURATION) {
+    return cachedStories.slice(0, limit);
+  }
+
   try {
     const response = await axiosInstance.get<number[]>(
       `${BASE_URL}/topstories.json`
@@ -27,7 +36,9 @@ export const getTopStories = async (limit: number = 10): Promise<HNStory[]> => {
     );
 
     const storyResponses = await Promise.all(storyPromises);
-    return storyResponses.map((response) => response.data);
+    cachedStories = storyResponses.map((response) => response.data);
+    lastFetchTime = now;
+    return cachedStories;
   } catch (error) {
     console.error('Error fetching top stories:', error);
     return [];
@@ -35,6 +46,11 @@ export const getTopStories = async (limit: number = 10): Promise<HNStory[]> => {
 };
 
 export const getStory = async (id: number): Promise<HNStory | null> => {
+  const cachedStory = cachedStories.find((story) => story.id === id);
+  if (cachedStory) {
+    return cachedStory;
+  }
+
   try {
     const response = await axiosInstance.get<HNStory>(
       `${BASE_URL}/item/${id}.json`
