@@ -9,6 +9,7 @@ export interface HNStory {
   by: string;
   time: number;
   score: number;
+  text: string;
 }
 
 const axiosInstance = axios.create({

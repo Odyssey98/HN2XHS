@@ -25,7 +25,7 @@ export const convertToXiaohongshu = (story: HNStory): XiaohongshuPost => {
     content,
     tags,
     imageDescription,
-    text: story.text,
+    text: story?.text,
   };
 };
 
