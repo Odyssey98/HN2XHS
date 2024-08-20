@@ -2,6 +2,7 @@ import type { NextPage } from 'next';
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { getTopStories, HNStory } from '../services/hackerNewsService';
 import {
   convertToXiaohongshu,
@@ -10,6 +11,7 @@ import {
 
 const Home: NextPage = () => {
   const [convertedPosts, setConvertedPosts] = useState<XiaohongshuPost[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchAndConvertStories = async () => {
@@ -20,6 +22,10 @@ const Home: NextPage = () => {
 
     fetchAndConvertStories();
   }, []);
+
+  const handlePostClick = (postId: number) => {
+    router.prefetch(`/post/${postId}`);
+  };
 
   return (
     <div>
@@ -34,8 +40,11 @@ const Home: NextPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {convertedPosts.map((post) => (
-            <Link href={`/post/${post.id}`} key={post.id}>
-              <div className="card p-4 cursor-pointer hover:shadow-lg transition-shadow duration-200">
+            <Link href={`/post/${post.id}`} key={post.id} passHref>
+              <div
+                className="card p-4 cursor-pointer hover:shadow-lg transition-shadow duration-200"
+                onMouseEnter={() => handlePostClick(post.id)}
+              >
                 <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
                 <p className="text-gray-600 mb-2">
                   {post.content.slice(0, 100)}...

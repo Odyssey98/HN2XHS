@@ -7,10 +7,19 @@ import {
 } from '../../services/conversionService';
 
 interface PostPageProps {
-  post: XiaohongshuPost;
+  post: XiaohongshuPost | null;
+  error?: string;
 }
 
-const PostPage: NextPage<PostPageProps> = ({ post }) => {
+const PostPage: NextPage<PostPageProps> = ({ post, error }) => {
+  if (error) {
+    return <div className="container mx-auto px-4 py-8">错误: {error}</div>;
+  }
+
+  if (!post) {
+    return <div className="container mx-auto px-4 py-8">加载中...</div>;
+  }
+
   return (
     <div>
       <Head>
@@ -44,20 +53,34 @@ const PostPage: NextPage<PostPageProps> = ({ post }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const id = Number(context.params?.id);
-  const story = await getStory(id);
-
-  if (!story) {
-    return {
-      notFound: true,
-    };
+  const id = context.params?.id;
+  if (typeof id !== 'string') {
+    return { props: { post: null, error: '无效的文章ID' } };
   }
 
-  const post = convertToXiaohongshu(story);
+  try {
+    const story = await Promise.race([
+      getStory(parseInt(id, 10)),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('请求超时')), 5000)
+      ),
+    ]);
 
-  return {
-    props: { post },
-  };
+    if (!story) {
+      return { props: { post: null, error: '文章未找到' } };
+    }
+
+    const post = convertToXiaohongshu(story);
+    return { props: { post } };
+  } catch (error) {
+    console.error('Error fetching story:', error);
+    return {
+      props: {
+        post: null,
+        error: error instanceof Error ? error.message : '获取文章时发生错误',
+      },
+    };
+  }
 };
 
 export default PostPage;

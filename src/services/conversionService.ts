@@ -8,10 +8,7 @@ export interface XiaohongshuPost {
   imageDescription: string;
 }
 
-// 简单的翻译函数，实际应用中应使用专业的翻译API
 const translateToChineseSimple = (text: string): string => {
-  // 这里应该实现实际的翻译逻辑
-  // 目前我们只是在英文标题前加上"[翻译]"作为示例
   return `[翻译] ${text}`;
 };
 
@@ -21,7 +18,13 @@ export const convertToXiaohongshu = (story: HNStory): XiaohongshuPost => {
   const tags = generateTags(story);
   const imageDescription = generateImageDescription(story);
 
-  return { id: story.id, title, content, tags, imageDescription };
+  return {
+    id: story.id,
+    title,
+    content,
+    tags,
+    imageDescription,
+  };
 };
 
 const generateAttractiveTitle = (originalTitle: string): string => {
