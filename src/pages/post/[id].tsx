@@ -10,7 +10,7 @@ import {
 import { generateAIContent } from '../../services/aiService';
 import Image from 'next/image';
 import { Toast } from '@/components/Toast';
-import Skeleton from '@/components/Skeleton';
+import SkeletonXHS from '@/components/SkeletonXHS';
 
 const PostPage: NextPage = () => {
   const router = useRouter();
@@ -68,9 +68,9 @@ const PostPage: NextPage = () => {
 
   if (loading) {
     return (
-      <div className="bg-white min-h-[70vh] flex items-start justify-center p-2 pt-8">
+      <div className="bg-white min-h-screen flex items-center justify-center p-2">
         <div className="w-full max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden p-3">
-          <Skeleton />
+          <SkeletonXHS />
         </div>
       </div>
     );
@@ -87,14 +87,14 @@ const PostPage: NextPage = () => {
   const avatarUrl = `https://ui-avatars.com/api/?name=HN&background=random&color=fff&size=100`;
 
   return (
-    <div className="bg-white min-h-[70vh] flex items-start justify-center p-2 pt-8">
+    <div className="bg-white min-h-screen flex items-center justify-center p-2">
       <Head>
         <title>{post.title} - HN转小红书</title>
         <meta name="description" content={post.content.slice(0, 160)} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="w-full max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden flex flex-col h-auto">
+      <main className="w-full max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden flex flex-col">
         <div className="p-3 lg:p-4 flex flex-col">
           <div className="flex items-center mb-2">
             <div className="w-8 h-8 rounded-full mr-2 overflow-hidden">
