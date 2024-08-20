@@ -7,6 +7,7 @@ export interface XiaohongshuPost {
   tags: string[];
   imageDescription: string;
   text?: string;
+  imageUrl?: string;
 }
 
 const translateToChineseSimple = (text: string): string => {

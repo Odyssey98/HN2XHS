@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getTopStories, HNStory } from '../services/hackerNewsService';
+import dotenv from 'dotenv';
+dotenv.config();
 
 interface EnhancedPost {
   id: number;
