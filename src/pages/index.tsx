@@ -1,6 +1,7 @@
 import type { NextPage } from 'next';
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { getTopStories, HNStory } from '../services/hackerNewsService';
 import {
   convertToXiaohongshu,
@@ -8,90 +9,50 @@ import {
 } from '../services/conversionService';
 
 const Home: NextPage = () => {
-  const [originalStory, setOriginalStory] = useState<HNStory | null>(null);
-  const [convertedPost, setConvertedPost] = useState<XiaohongshuPost | null>(
-    null
-  );
+  const [convertedPosts, setConvertedPosts] = useState<XiaohongshuPost[]>([]);
 
   useEffect(() => {
-    const fetchAndConvertStory = async () => {
-      const topStories = await getTopStories(1);
-      if (topStories.length > 0) {
-        setOriginalStory(topStories[0]);
-        setConvertedPost(convertToXiaohongshu(topStories[0]));
-      }
+    const fetchAndConvertStories = async () => {
+      const topStories = await getTopStories(10);
+      const converted = topStories.map((story) => convertToXiaohongshu(story));
+      setConvertedPosts(converted);
     };
 
-    fetchAndConvertStory();
+    fetchAndConvertStories();
   }, []);
-
-  if (!originalStory || !convertedPost) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div>
       <Head>
-        <title>HN to Xiaohongshu</title>
-        <meta
-          name="description"
-          content="Convert Hacker News posts to Xiaohongshu style"
-        />
+        <title>HN转小红书 - 科技资讯</title>
+        <meta name="description" content="Hacker News 文章转换为小红书风格" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">
-          HN to Xiaohongshu Conversion
-        </h1>
+        <h1 className="text-3xl font-bold mb-6">HN转小红书 - 最新科技资讯</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="original-post">
-            <h2 className="text-2xl font-semibold mb-4">
-              Original Hacker News Post
-            </h2>
-            <div className="card p-4">
-              <h3 className="text-xl font-semibold mb-2">
-                {originalStory.title}
-              </h3>
-              <p className="text-gray-600 mb-2">By: {originalStory.by}</p>
-              <a
-                href={originalStory.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                Read original
-              </a>
-            </div>
-          </div>
-
-          <div className="converted-post">
-            <h2 className="text-2xl font-semibold mb-4">
-              Converted Xiaohongshu Style Post
-            </h2>
-            <div className="card p-4">
-              <h3 className="text-xl font-semibold mb-2">
-                {convertedPost.title}
-              </h3>
-              <p className="whitespace-pre-line mb-4">
-                {convertedPost.content}
-              </p>
-              <div className="mb-2">
-                {convertedPost.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="inline-block bg-secondary text-primary rounded-full px-3 py-1 text-sm font-semibold mr-2 mb-2"
-                  >
-                    #{tag}
-                  </span>
-                ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {convertedPosts.map((post) => (
+            <Link href={`/post/${post.id}`} key={post.id}>
+              <div className="card p-4 cursor-pointer hover:shadow-lg transition-shadow duration-200">
+                <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
+                <p className="text-gray-600 mb-2">
+                  {post.content.slice(0, 100)}...
+                </p>
+                <div className="mt-2">
+                  {post.tags.slice(0, 3).map((tag, index) => (
+                    <span
+                      key={index}
+                      className="inline-block bg-secondary text-primary rounded-full px-3 py-1 text-sm font-semibold mr-2 mb-2"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <p className="text-gray-600 italic">
-                Image: {convertedPost.imageDescription}
-              </p>
-            </div>
-          </div>
+            </Link>
+          ))}
         </div>
       </main>
     </div>

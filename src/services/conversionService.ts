@@ -1,60 +1,61 @@
 import { HNStory } from './hackerNewsService';
 
 export interface XiaohongshuPost {
+  id: number;
   title: string;
   content: string;
   tags: string[];
   imageDescription: string;
 }
 
+// 简单的翻译函数，实际应用中应使用专业的翻译API
+const translateToChineseSimple = (text: string): string => {
+  // 这里应该实现实际的翻译逻辑
+  // 目前我们只是在英文标题前加上"[翻译]"作为示例
+  return `[翻译] ${text}`;
+};
+
 export const convertToXiaohongshu = (story: HNStory): XiaohongshuPost => {
-  // 生成更吸引人的标题
   const title = generateAttractiveTitle(story.title);
-
-  // 提取关键信息并生成内容
   const content = generateContent(story);
-
-  // 生成相关标签
   const tags = generateTags(story);
-
-  // 生成图片描述（在实际应用中，这可能会使用 AI 生成）
   const imageDescription = generateImageDescription(story);
 
-  return { title, content, tags, imageDescription };
+  return { id: story.id, title, content, tags, imageDescription };
 };
 
 const generateAttractiveTitle = (originalTitle: string): string => {
-  // 这里可以实现更复杂的逻辑来生成吸引人的标题
-  return `🔥 ${originalTitle} 💡`;
+  const translatedTitle = translateToChineseSimple(originalTitle);
+  return `🔥 ${translatedTitle} 💡`;
 };
 
 const generateContent = (story: HNStory): string => {
-  // 在实际应用中，这里可能会使用 NLP 来提取和总结文章的主要内容
+  const translatedTitle = translateToChineseSimple(story.title);
   return `
-嘿，各位小主们！今天给大家分享一个超级有趣的科技新闻！🚀
+各位小主们好！今天给大家分享一个超级有趣的科技新闻！🚀
 
-${story.title}
+${translatedTitle}
 
 这个新闻来自 Hacker News，绝对是技术圈的大事件！💻✨
 
-关键点：
-1️⃣ [在这里添加文章的第一个关键点]
-2️⃣ [在这里添加文章的第二个关键点]
-3️⃣ [在这里添加文章的第三个关键点]
+要点解析：
+1️⃣ [这里应该是第一个要点的中文解释]
+2️⃣ [这里应该是第二个要点的中文解释]
+3️⃣ [这里应该是第三个要点的中文解释]
 
-想要了解更多吗？点击下方链接阅读原文哦！👇
+想深入了解吗？可以去看看原文哦！注意：原文是英语的哦！👇
 ${story.url}
 
-记得点赞+收藏，让更多人看到这个超赞的内容！❤️📌
-  `.trim();
+如果觉得有收获，别忘了点赞+收藏哦！让更多小伙伴也能看到这个精彩内容！❤️📌
+`.trim();
 };
 
 const generateTags = (story: HNStory): string[] => {
-  // 这里可以使用更智能的方法来生成相关标签
-  return ['科技', '创新', 'HackerNews', '程序员必看'];
+  return ['科技资讯', '程序员日常', 'HackerNews', '互联网趋势', '技术创新'];
 };
 
 const generateImageDescription = (story: HNStory): string => {
-  // 在实际应用中，这里可能会使用 AI 来生成与文章相关的图片描述
-  return `一张表现${story.title}主题的炫酷科技风图片`;
+  return `一张体现"${translateToChineseSimple(
+    story.title
+  )}"主题的炫酷科技风图片`;
 };
