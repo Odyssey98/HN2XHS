@@ -17,8 +17,8 @@ const Layout = ({ children }: LayoutProps) => {
             <Link href="/" className="nav-link mr-4">
               Home
             </Link>
-            <Link href="/admin" className="nav-link">
-              Admin
+            <Link href="/about" className="nav-link">
+              About
             </Link>
           </div>
         </div>
