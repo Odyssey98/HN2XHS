@@ -1,4 +1,4 @@
-import type { NextPage } from 'next';
+import type { NextPage, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image,{StaticImageData } from 'next/image';
@@ -19,11 +19,22 @@ interface EnhancedPost {
   initials: string; 
 }
 
+interface HomeProps {
+  initialPosts: EnhancedPost[];
+}
+
 const ITEMS_PER_PAGE = 12;
 
-const Home: NextPage = () => {
-  const [postsMap, setPostsMap] = useState<Record<number, EnhancedPost>>({});
-  const [page, setPage] = useState(0);
+const Home: NextPage<HomeProps> = ({ initialPosts }) => {
+  const [postsMap, setPostsMap] = useState<Record<number, EnhancedPost>>(() => {
+    // 初始化 postsMap 使用 initialPosts
+    const map: Record<number, EnhancedPost> = {};
+    initialPosts.forEach(post => {
+      map[post.id] = post;
+    });
+    return map;
+  });
+  const [page, setPage] = useState(1); // 从第1页开始，因为第0页已经在服务端渲染
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const loader = useRef<HTMLDivElement>(null);
@@ -78,8 +89,10 @@ const Home: NextPage = () => {
   const posts = Object.values(postsMap);
 
   useEffect(() => {
-    loadMorePosts();
-  }, []);
+    if (initialPosts.length < ITEMS_PER_PAGE) {
+      setHasMore(false);
+    }
+  }, [initialPosts.length]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -186,6 +199,42 @@ const Home: NextPage = () => {
       </main>
     </div>
   );
+};
+
+export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
+  try {
+    const stories = await getTopStories(ITEMS_PER_PAGE, 0);
+    const initialPosts = stories.map(enhancePost);
+    return {
+      props: {
+        initialPosts,
+      },
+    };
+  } catch (error) {
+    console.error('获取初始帖子时出错:', error);
+    return {
+      props: {
+        initialPosts: [],
+      },
+    };
+  }
+};
+
+// 确保 enhancePost 函数在这里定义，或者从其他地方导入
+const enhancePost = (story: HNStory): EnhancedPost => {
+  const initials = story.by.split(' ').map(name => name[0]).join('').toUpperCase();
+  return {
+    id: story.id,
+    title: story.title,
+    author: story.by,
+    likes: story.score,
+    tags: ['科技', '创新', 'Hacker News']
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 2),
+    imageUrl: placeholderImg, // 使用占位图像
+    avatarUrl: '', // 我们将使用 AvatarGenerator 组件，所以这里可以为空
+    initials: initials,
+  };
 };
 
 export default Home;
