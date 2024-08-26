@@ -40,18 +40,8 @@ const PostPage: NextPage = () => {
       try {
         const story = await getStory(Number(id));
         if (story) {
-          const convertedPost = convertToXiaohongshu(story);
-
-          // 使用AI生成内容
-          const aiContent = await generateAIContent(story);
-
-          setPost({
-            ...convertedPost,
-            title: aiContent.title ?? '',
-            tags: aiContent.tags ?? [],
-            imageDescription: aiContent.imageDescription ?? '',
-            imageUrl: aiContent.imageUrl ?? '',
-          });
+          const convertedPost = await convertToXiaohongshu(story);
+          setPost(convertedPost);
         } else {
           setError('文章未找到');
         }

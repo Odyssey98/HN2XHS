@@ -70,11 +70,25 @@ export default async function handler(
       imageDescriptionCompletion.choices[0]?.message?.content;
     console.log('生成的图片描述:', imageDescription);
 
+    console.log('开始生成内容...');
+    const contentCompletion = await openai.chat.completions.create({
+      messages: [
+        { role: 'system', content: '你是一个专业的小红书内容创作者。' },
+        {
+          role: 'user',
+          content: `根据以下标题生成一篇吸引人的小红书内容，包括简介、要点分析和结语：${story.title}`,
+        },
+      ],
+      model: 'ep-20240820165714-ckvrz',
+    });
+    const content = contentCompletion.choices[0]?.message?.content;
+    console.log('生成的内容:', content);
+
     const imageUrl = `https://picsum.photos/seed/${Math.floor(
       Math.random() * 1000
     )}/1024/1024`;
 
-    const result = { title, tags, imageDescription, imageUrl };
+    const result = { title, tags, imageDescription, content, imageUrl };
     console.log('生成的结果:', result);
 
     res.status(200).json(result);

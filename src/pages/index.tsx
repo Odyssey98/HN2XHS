@@ -32,7 +32,7 @@ const Home: NextPage = () => {
     tags: ['科技', '创新', 'Hacker News']
       .sort(() => 0.5 - Math.random())
       .slice(0, 2),
-    imageUrl: `https://picsum.photos/seed/${story.id}/300/200`,
+    imageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(story.title)}&background=random&size=300`,
   });
 
   const loadMorePosts = useCallback(async () => {
@@ -105,6 +105,9 @@ const Home: NextPage = () => {
                         alt={post.title}
                         layout="fill"
                         objectFit="cover"
+                        onError={(e) => {
+                          e.currentTarget.src = '/images/placeholder.jpg';
+                        }}
                       />
                     </div>
                     <div className="p-5">

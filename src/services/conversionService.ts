@@ -1,4 +1,5 @@
 import { HNStory } from './hackerNewsService';
+import { generateAIContent } from './aiService';
 
 export interface XiaohongshuPost {
   id: number;
@@ -14,19 +15,18 @@ const translateToChineseSimple = (text: string): string => {
   return `[翻译] ${text}`;
 };
 
-export const convertToXiaohongshu = (story: HNStory): XiaohongshuPost => {
-  const title = generateAttractiveTitle(story.title);
-  const content = generateContent(story);
-  const tags = generateTags(story);
-  const imageDescription = generateImageDescription(story);
+export const convertToXiaohongshu = async (story: HNStory): Promise<XiaohongshuPost> => {
+  // 使用AI生成内容
+  const aiContent = await generateAIContent(story);
 
   return {
     id: story.id,
-    title,
-    content,
-    tags,
-    imageDescription,
+    title: aiContent.title ?? generateAttractiveTitle(story.title),
+    content: aiContent.content ?? generateContent(story),
+    tags: aiContent.tags ?? generateTags(story),
+    imageDescription: aiContent.imageDescription ?? generateImageDescription(story),
     text: story?.text,
+    imageUrl: aiContent.imageUrl,
   };
 };
 
