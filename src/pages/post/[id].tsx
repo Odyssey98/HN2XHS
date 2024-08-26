@@ -1,23 +1,19 @@
-import { NextPage } from 'next';
+import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { getStory, HNStory } from '../../services/hackerNewsService';
-import {
-  convertToXiaohongshu,
-  XiaohongshuPost,
-} from '../../services/conversionService';
-import { generateAIContent } from '../../services/aiService';
 import Image from 'next/image';
+import { useState } from 'react';
+import { getStory, HNStory } from '../../services/hackerNewsService';
+import { convertToXiaohongshu, XiaohongshuPost } from '../../services/conversionService';
+import { generateAIContent } from '../../services/aiService';
 import { Toast } from '@/components/Toast';
 import SkeletonXHS from '@/components/SkeletonXHS';
 
-const PostPage: NextPage = () => {
-  const router = useRouter();
-  const { id } = router.query;
-  const [post, setPost] = useState<XiaohongshuPost | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface PostPageProps {
+  post: XiaohongshuPost | null;
+  error: string | null;
+}
+
+const PostPage: NextPage<PostPageProps> = ({ post, error }) => {
   const [showToast, setShowToast] = useState(false);
 
   const copyToClipboard = (text: string) => {
@@ -31,40 +27,6 @@ const PostPage: NextPage = () => {
         console.error('复制失败:', err);
       });
   };
-
-  useEffect(() => {
-    const fetchPost = async () => {
-      if (typeof id !== 'string') return;
-
-      setLoading(true);
-      try {
-        const story = await getStory(Number(id));
-        if (story) {
-          const convertedPost = await convertToXiaohongshu(story);
-          setPost(convertedPost);
-        } else {
-          setError('文章未找到');
-        }
-      } catch (err) {
-        console.error('Error fetching story:', err);
-        setError('获取文章时发生错误');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPost();
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="bg-white min-h-screen flex items-center justify-center p-2">
-        <div className="w-full max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden p-3">
-          <SkeletonXHS />
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return <div className="container mx-auto px-4 py-8">错误: {error}</div>;
@@ -163,6 +125,33 @@ const PostPage: NextPage = () => {
       {showToast && <Toast message="内容已复制" />}
     </div>
   );
+};
+
+export const getServerSideProps: GetServerSideProps<PostPageProps> = async (context) => {
+  const { id } = context.params as { id: string };
+
+  try {
+    const story = await getStory(Number(id));
+    if (!story) {
+      return { props: { post: null, error: '文章未找到' } };
+    }
+
+    const convertedPost = convertToXiaohongshu(story);
+    const aiContent = await generateAIContent(story);
+
+    const post: XiaohongshuPost = {
+      ...convertedPost,
+      title: aiContent.title ?? '',
+      tags: aiContent.tags ?? [],
+      imageDescription: aiContent.imageDescription ?? '',
+      imageUrl: aiContent.imageUrl ?? '',
+    };
+
+    return { props: { post, error: null } };
+  } catch (err) {
+    console.error('Error fetching story:', err);
+    return { props: { post: null, error: '获取文章时发生错误' } };
+  }
 };
 
 export default PostPage;

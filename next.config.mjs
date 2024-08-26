@@ -27,9 +27,13 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
     formats: ['image/webp'],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   env: {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    KV_REST_API_URL: process.env.KV_REST_API_URL,
+    KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
   },
   experimental: {
     largePageDataBytes: 128 * 100000, // 增加页面数据大小限制

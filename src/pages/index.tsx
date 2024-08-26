@@ -97,7 +97,7 @@ const Home: NextPage = () => {
                 <SkeletonHN key={index} />
               ))
             : posts.map((post) => (
-                <Link href={`/post/${post.id}`} key={post.id}>
+                <Link href={`/post/${post.id}`} key={post.id} className="block">
                   <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 transform hover:-translate-y-1 border border-gray-200">
                     <div className="relative h-48">
                       <Image
