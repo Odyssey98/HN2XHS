@@ -1,4 +1,4 @@
-import type { NextPage, GetServerSideProps } from 'next';
+import type { NextPage, GetServerSideProps, GetStaticProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image,{StaticImageData } from 'next/image';
@@ -49,7 +49,7 @@ const Home: NextPage<HomeProps> = ({ initialPosts }) => {
       tags: ['科技', '创新', 'Hacker News']
         .sort(() => 0.5 - Math.random())
         .slice(0, 2),
-      imageUrl: placeholderImg, // 使用占位图像
+      imageUrl: placeholderImg?.src, 
       avatarUrl: '', // 我们将使用 AvatarGenerator 组件，所以这里可以为空
       initials: initials,
     };
@@ -140,7 +140,7 @@ const Home: NextPage<HomeProps> = ({ initialPosts }) => {
                         objectFit="cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = placeholderImg.src;
+                          target.src = placeholderImg?.src;
                           target.onerror = null; // 防止无限循环
                         }}
                       />
@@ -201,7 +201,8 @@ const Home: NextPage<HomeProps> = ({ initialPosts }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
+// 将 getServerSideProps 改为 getStaticProps
+export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
     const stories = await getTopStories(ITEMS_PER_PAGE, 0);
     const initialPosts = stories.map(enhancePost);
@@ -209,6 +210,8 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
       props: {
         initialPosts,
       },
+      // 设置重新生成时间为24小时
+      revalidate: 60 * 60 * 24,
     };
   } catch (error) {
     console.error('获取初始帖子时出错:', error);
@@ -216,6 +219,7 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
       props: {
         initialPosts: [],
       },
+      revalidate: 60 * 60 * 24,
     };
   }
 };
@@ -231,7 +235,7 @@ const enhancePost = (story: HNStory): EnhancedPost => {
     tags: ['科技', '创新', 'Hacker News']
       .sort(() => 0.5 - Math.random())
       .slice(0, 2),
-    imageUrl: placeholderImg, // 使用占位图像
+    imageUrl: placeholderImg?.src, // 使用占位图像
     avatarUrl: '', // 我们将使用 AvatarGenerator 组件，所以这里可以为空
     initials: initials,
   };
