@@ -75,6 +75,8 @@ const PostPage = () => {
       });
   };
 
+  const avatarUrl = `https://ui-avatars.com/api/?name=HN&background=random&color=fff&size=100`;
+
   if (loading) {
     return <SkeletonXHS />;
   }
@@ -86,8 +88,6 @@ const PostPage = () => {
   if (!post) {
     return <div className="container mx-auto px-4 py-8">文章未找到</div>;
   }
-
-  const avatarUrl = `https://ui-avatars.com/api/?name=HN&background=random&color=fff&size=100`;
 
   return (
     <div className="bg-white min-h-screen flex items-center justify-center p-2">
