@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { getTopStories, HNStory } from '../services/hackerNewsService';
 import SkeletonHN from '@/components/SkeletonHN';
 import AvatarGenerator from '@/components/AvatarGenerator';
-import placeholderImg from '@/images/placeholder.jpg'
+import placeholderImg from '../../public/images/placeholder.jpg'
 
 interface EnhancedPost {
   id: number;
@@ -25,6 +25,22 @@ interface HomeProps {
 
 const ITEMS_PER_PAGE = 12;
 
+const enhancePost = (story: HNStory): EnhancedPost => {
+  const initials = story.by.split(' ').map(name => name[0]).join('').toUpperCase();
+  return {
+    id: story.id,
+    title: story.title,
+    author: story.by,
+    likes: story.score,
+    tags: ['科技', '创新', 'Hacker News']
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 2),
+    imageUrl: placeholderImg,
+    avatarUrl: '',
+    initials: initials,
+  };
+};
+
 const Home: NextPage<HomeProps> = ({ initialPosts }) => {
   const [postsMap, setPostsMap] = useState<Record<number, EnhancedPost>>(() => {
     // 初始化 postsMap 使用 initialPosts
@@ -38,22 +54,6 @@ const Home: NextPage<HomeProps> = ({ initialPosts }) => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const loader = useRef<HTMLDivElement>(null);
-
-  const enhancePost = (story: HNStory): EnhancedPost => {
-    const initials = story.by.split(' ').map(name => name[0]).join('').toUpperCase();
-    return {
-      id: story.id,
-      title: story.title,
-      author: story.by,
-      likes: story.score,
-      tags: ['科技', '创新', 'Hacker News']
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 2),
-      imageUrl: placeholderImg?.src, 
-      avatarUrl: '', // 我们将使用 AvatarGenerator 组件，所以这里可以为空
-      initials: initials,
-    };
-  };
 
   const loadMorePosts = useCallback(async () => {
     if (loading || !hasMore) return;
@@ -219,23 +219,6 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       revalidate: 60 * 60 * 24,
     };
   }
-};
-
-// 确保 enhancePost 函数在这里定义，或者从其他地方导入
-const enhancePost = (story: HNStory): EnhancedPost => {
-  const initials = story.by.split(' ').map(name => name[0]).join('').toUpperCase();
-  return {
-    id: story.id,
-    title: story.title,
-    author: story.by,
-    likes: story.score,
-    tags: ['科技', '创新', 'Hacker News']
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 2),
-    imageUrl: placeholderImg.src,
-    avatarUrl: '', // 我们将使用 AvatarGenerator 组件，所以这里可以为空
-    initials: initials,
-  };
 };
 
 export default Home;
