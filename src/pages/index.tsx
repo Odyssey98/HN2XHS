@@ -1,10 +1,12 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-import Image from 'next/image';
+import Image,{StaticImageData } from 'next/image';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getTopStories, HNStory } from '../services/hackerNewsService';
 import SkeletonHN from '@/components/SkeletonHN';
+import AvatarGenerator from '@/components/AvatarGenerator';
+import placeholderImg from '@/images/placeholder.jpg'
 
 interface EnhancedPost {
   id: number;
@@ -12,14 +14,15 @@ interface EnhancedPost {
   author: string;
   likes: number;
   tags: string[];
-  imageUrl: string;
+  imageUrl: string | StaticImageData;
   avatarUrl: string;
+  initials: string; 
 }
 
 const ITEMS_PER_PAGE = 12;
 
 const Home: NextPage = () => {
-  const [posts, setPosts] = useState<EnhancedPost[]>([]);
+  const [postsMap, setPostsMap] = useState<Record<number, EnhancedPost>>({});
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -35,8 +38,9 @@ const Home: NextPage = () => {
       tags: ['科技', '创新', 'Hacker News']
         .sort(() => 0.5 - Math.random())
         .slice(0, 2),
-      imageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(story.title)}&background=random&size=300`,
-      avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=random&size=40`,
+      imageUrl: placeholderImg, // 使用占位图像
+      avatarUrl: '', // 我们将使用 AvatarGenerator 组件，所以这里可以为空
+      initials: initials,
     };
   };
 
@@ -52,15 +56,26 @@ const Home: NextPage = () => {
         setHasMore(false);
       } else {
         const newPosts = newStories.map(enhancePost);
-        setPosts((prev) => [...prev, ...newPosts]);
+        setPostsMap((prev) => {
+          const updatedPosts = { ...prev };
+          newPosts.forEach((post) => {
+            if (!updatedPosts[post.id]) {
+              updatedPosts[post.id] = post;
+            }
+          });
+          return updatedPosts;
+        });
         setPage((prev) => prev + 1);
       }
     } catch (error) {
-      console.error('Error loading more posts:', error);
+      console.error('加载更多帖子时出错:', error);
     } finally {
       setLoading(false);
     }
   }, [page, loading, hasMore]);
+
+  // 将 postsMap 转换为数组以用于渲染
+  const posts = Object.values(postsMap);
 
   useEffect(() => {
     loadMorePosts();
@@ -111,7 +126,9 @@ const Home: NextPage = () => {
                         layout="fill"
                         objectFit="cover"
                         onError={(e) => {
-                          e.currentTarget.src = '/images/placeholder.jpg';
+                          const target = e.target as HTMLImageElement;
+                          target.src = placeholderImg.src;
+                          target.onerror = null; // 防止无限循环
                         }}
                       />
                     </div>
@@ -120,11 +137,9 @@ const Home: NextPage = () => {
                         {post.title}
                       </h2>
                       <div className="flex items-center mb-3">
-                        <Image
-                          src={post.avatarUrl}
-                          alt={post.author}
-                          width={24}
-                          height={24}
+                        <AvatarGenerator
+                          initials={post.initials}
+                          size={24}
                           className="rounded-full mr-2"
                         />
                         <span className="text-sm text-gray-600">
