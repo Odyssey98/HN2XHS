@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hn-to-xiaohongshu.vercel.app/sitemap.xml

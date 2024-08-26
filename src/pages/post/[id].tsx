@@ -33,7 +33,7 @@ const PostPage = () => {
       setPost(convertedPost);
       setLoading(false);
 
-      // 异步获取AI生成的内
+      // 异步获取AI生成的内容
       fetchAIContent(story);
     } catch (err) {
       console.error('Error fetching story:', err);
@@ -89,12 +89,27 @@ const PostPage = () => {
     return <div className="container mx-auto px-4 py-8">文章未找到</div>;
   }
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": post.title,
+    "author": {
+      "@type": "Person",
+      "name": post.author || "未知作者"
+    },
+    "datePublished": post.time ? new Date(post.time * 1000).toISOString() : new Date().toISOString(),
+    "description": post.content ? post.content.substring(0, 200) : "无描述"
+  };
+
   return (
     <div className="bg-white min-h-screen flex items-center justify-center p-2">
       <Head>
         <title>{post.title} - HN转小红书</title>
         <meta name="description" content={post.content ? post.content.slice(0, 160) : ''} />
         <link rel="icon" href="/favicon.ico" />
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
       </Head>
 
       <main className="w-full max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden flex flex-col">
