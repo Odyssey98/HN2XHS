@@ -9,6 +9,7 @@ export interface XiaohongshuPost {
   imageDescription: string;
   text?: string;
   imageUrl?: string;
+  url?:string;
 }
 
 const translateToChineseSimple = (text: string): string => {
@@ -27,6 +28,7 @@ export const convertToXiaohongshu = async (story: HNStory): Promise<XiaohongshuP
     imageDescription: aiContent.imageDescription ?? generateImageDescription(story),
     text: story?.text,
     imageUrl: aiContent.imageUrl,
+    url:story?.url
   };
 };
 
