@@ -134,15 +134,12 @@ const Home: NextPage<HomeProps> = ({ initialPosts }) => {
                   <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 transform hover:-translate-y-1 border border-gray-200">
                     <div className="relative h-48">
                       <Image
-                        src={post.imageUrl}
+                        src={post.imageUrl || placeholderImg}
                         alt={post.title}
                         layout="fill"
                         objectFit="cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = placeholderImg?.src;
-                          target.onerror = null; // 防止无限循环
-                        }}
+                        placeholder="blur"
+                        blurDataURL={placeholderImg.blurDataURL}
                       />
                     </div>
                     <div className="p-5">
@@ -235,7 +232,7 @@ const enhancePost = (story: HNStory): EnhancedPost => {
     tags: ['科技', '创新', 'Hacker News']
       .sort(() => 0.5 - Math.random())
       .slice(0, 2),
-    imageUrl: placeholderImg?.src, // 使用占位图像
+    imageUrl: placeholderImg.src,
     avatarUrl: '', // 我们将使用 AvatarGenerator 组件，所以这里可以为空
     initials: initials,
   };
