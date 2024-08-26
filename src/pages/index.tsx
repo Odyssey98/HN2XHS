@@ -13,6 +13,7 @@ interface EnhancedPost {
   likes: number;
   tags: string[];
   imageUrl: string;
+  avatarUrl: string;
 }
 
 const ITEMS_PER_PAGE = 12;
@@ -24,16 +25,20 @@ const Home: NextPage = () => {
   const [hasMore, setHasMore] = useState(true);
   const loader = useRef<HTMLDivElement>(null);
 
-  const enhancePost = (story: HNStory): EnhancedPost => ({
-    id: story.id,
-    title: story.title,
-    author: story.by,
-    likes: story.score,
-    tags: ['科技', '创新', 'Hacker News']
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 2),
-    imageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(story.title)}&background=random&size=300`,
-  });
+  const enhancePost = (story: HNStory): EnhancedPost => {
+    const initials = story.by.split(' ').map(name => name[0]).join('').toUpperCase();
+    return {
+      id: story.id,
+      title: story.title,
+      author: story.by,
+      likes: story.score,
+      tags: ['科技', '创新', 'Hacker News']
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 2),
+      imageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(story.title)}&background=random&size=300`,
+      avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=random&size=40`,
+    };
+  };
 
   const loadMorePosts = useCallback(async () => {
     if (loading || !hasMore) return;
@@ -116,7 +121,7 @@ const Home: NextPage = () => {
                       </h2>
                       <div className="flex items-center mb-3">
                         <Image
-                          src={`https://i.pravatar.cc/40?u=${post.author}`}
+                          src={post.avatarUrl}
                           alt={post.author}
                           width={24}
                           height={24}
