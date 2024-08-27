@@ -69,10 +69,10 @@ const About: NextPage = () => {
       </Head>
 
       <main className="container mx-auto px-4 py-6 flex-grow flex flex-col">
-        <div className="grid grid-cols-2 gap-4 flex-grow">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 flex-grow">
           <div className="bg-white rounded-xl shadow-md p-4">
             <h2 className="text-xl font-bold mb-2 text-gray-800">产品流程图</h2>
-            <div style={{ height: 'calc(100% - 2rem)' }}>
+            <div style={{ height: '60vh', minHeight: '300px' }}>
               <ReactFlow nodes={nodes} edges={edges} fitView>
                 <Controls />
                 <Background />
@@ -81,18 +81,18 @@ const About: NextPage = () => {
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6 flex flex-col">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">
+            <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-800">
               这是啥玩意儿？
             </h2>
-            <p className="text-base text-gray-600 mb-6">
+            <p className="text-sm md:text-base text-gray-600 mb-6">
               简单来说，我们就是把Hacker
               News上的有趣资讯搬到小红书上。不过不是简单地复制粘贴，而是把内容、图片、标题和标签都整得符合小红书的风格。这样一来，想在小红书上运营科技类账号的朋友们就方便多了！
             </p>
 
-            <h2 className="text-2xl font-bold mb-3 text-gray-800">
+            <h2 className="text-xl md:text-2xl font-bold mb-3 text-gray-800">
               我们想干啥？
             </h2>
-            <ul className="text-base list-disc list-inside text-gray-600 mb-4">
+            <ul className="text-sm md:text-base list-disc list-inside text-gray-600 mb-4">
               <li>让更多人了解最新的科技动态，不用费劲翻墙</li>
               <li>把高大上的技术话题变得通俗易懂，让大家都能聊两句</li>
               <li>激发更多人对科技的兴趣</li>
@@ -100,19 +100,19 @@ const About: NextPage = () => {
             </ul>
 
             <div className="mt-4">
-              <h2 className="text-2xl font-bold mb-2 text-gray-800">
+              <h2 className="text-xl md:text-2xl font-bold mb-2 text-gray-800">
                 想聊聊？
               </h2>
-              <p className="text-lg">邮箱：yongbi1998@proton.me</p>
-              <p className="text-lg">微信：Odyssey98</p>
+              <p className="text-base md:text-lg">邮箱：yongbi1998@proton.me</p>
+              <p className="text-base md:text-lg">微信：Odyssey98</p>
             </div>
           </div>
         </div>
 
-        <div className="text-center mt-4">
+        <div className="text-center mt-6">
           <Link
             href="/"
-            className="text-blue-600 hover:text-blue-800 transition-colors duration-300"
+            className="text-blue-600 hover:text-blue-800 transition-colors duration-300 text-lg"
           >
             返回首页
           </Link>
