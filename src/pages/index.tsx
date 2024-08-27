@@ -1,9 +1,9 @@
-import type { NextPage, GetServerSideProps, GetStaticProps } from 'next';
+import type { NextPage, GetStaticProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image,{StaticImageData } from 'next/image';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getTopStories, HNStory } from '../services/hackerNewsService';
+import { getTopStories, HNStory } from '@/services/hackerNewsService';
 import SkeletonHN from '@/components/SkeletonHN';
 import AvatarGenerator from '@/components/AvatarGenerator';
 import placeholderImg from '../../public/images/placeholder.jpg'
@@ -35,7 +35,7 @@ const enhancePost = (story: HNStory): EnhancedPost => {
     tags: ['科技', '创新', 'Hacker News']
       .sort(() => 0.5 - Math.random())
       .slice(0, 2),
-    imageUrl: placeholderImg,
+    imageUrl: story.imageUrl, 
     avatarUrl: '',
     initials: initials,
   };
@@ -67,6 +67,7 @@ const Home: NextPage<HomeProps> = ({ initialPosts }) => {
         setHasMore(false);
       } else {
         const newPosts = newStories.map(enhancePost);
+        console.log('newPosts', newPosts);
         setPostsMap((prev) => {
           const updatedPosts = { ...prev };
           newPosts.forEach((post) => {
@@ -134,12 +135,13 @@ const Home: NextPage<HomeProps> = ({ initialPosts }) => {
                   <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 transform hover:-translate-y-1 border border-gray-200">
                     <div className="relative h-48">
                       <Image
-                        src={post.imageUrl || placeholderImg}
+                        src={post.imageUrl}
                         alt={post.title}
                         fill
                         style={{ objectFit: 'cover' }}
-                        placeholder="blur"
-                        blurDataURL={placeholderImg.blurDataURL}
+                        onError={(e) => {
+                          e.currentTarget.src = placeholderImg.src;
+                        }}
                       />
                     </div>
                     <div className="p-5">
@@ -198,16 +200,17 @@ const Home: NextPage<HomeProps> = ({ initialPosts }) => {
   );
 };
 
-// 将 getServerSideProps 改为 getStaticProps
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
     const stories = await getTopStories(ITEMS_PER_PAGE, 0);
-    const initialPosts = stories.map(enhancePost);
+    const initialPosts = stories.map(enhancePost).map(post => ({
+      ...post,
+      imageUrl: post.imageUrl || `https://picsum.photos/seed/${post.id}/1024/1024`
+    }));
     return {
       props: {
         initialPosts,
       },
-      // 设置重新生成时间为24小时
       revalidate: 60 * 60 * 24,
     };
   } catch (error) {

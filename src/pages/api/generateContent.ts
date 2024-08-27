@@ -37,7 +37,7 @@ export default async function handler(
     }
 
     // 如果缓存中没有，则生成新内容
-    console.log('生���新内容...');
+    console.log('生成内容...');
     const result = await generateContent(story);
 
     // 将生成的内容存入 Vercel KV 缓存，不设置过期时间
@@ -58,14 +58,15 @@ async function generateContent(story: HNStory) {
     generateMainContent(story),
   ]);
 
-  const imageUrl = `https://picsum.photos/seed/${Math.floor(Math.random() * 1000)}/1024/1024`;
+  // 移除这行
+  // const imageUrl = `https://picsum.photos/seed/${Math.floor(Math.random() * 1000)}/1024/1024`;
 
+  // 在返回的对象中，不包含 imageUrl
   return {
     title: titleResult,
     tags: tagsResult,
     imageDescription: imageDescriptionResult,
     content: contentResult,
-    imageUrl,
   };
 }
 

@@ -11,6 +11,7 @@ export interface HNStory {
   time: number;
   score: number;
   text: string;
+  imageUrl: string; // 新增字段
 }
 
 const axiosInstance = axios.create({
@@ -48,7 +49,10 @@ const fetchTopStoryIds = async (): Promise<number[]> => {
 
 const fetchAndCacheStories = async (ids: number[]): Promise<HNStory[]> => {
   const stories = await Promise.all(ids.map(id => getStory(id)));
-  return stories.filter((story): story is HNStory => story !== null);
+  return stories.filter((story): story is HNStory => story !== null).map(story => ({
+    ...story,
+    imageUrl: `https://picsum.photos/seed/${story.id}/1024/1024` // 为每个故事生成图片 URL
+  }));
 };
 
 export const getStory = async (id: number): Promise<HNStory | null> => {
@@ -60,7 +64,10 @@ export const getStory = async (id: number): Promise<HNStory | null> => {
       const response = await axiosInstance.get<HNStory>(
         `${BASE_URL}/item/${id}.json`
       );
-      story = response.data;
+      story = {
+        ...response.data,
+        imageUrl: `https://picsum.photos/seed/${id}/1024/1024` // 为每个故事生成一个唯一的图片 URL
+      };
       await kv.set(cacheKey, story, { ex: DAILY_CACHE_DURATION });
     } catch (error) {
       console.error(`Error fetching story ${id}:`, error);

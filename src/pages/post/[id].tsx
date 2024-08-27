@@ -30,7 +30,10 @@ const PostPage = () => {
       }
 
       const convertedPost = await convertToXiaohongshu(story);
-      setPost(convertedPost);
+      setPost({
+        ...convertedPost,
+        imageUrl: story.imageUrl, // 使用从服务层获取的 imageUrl
+      });
       setLoading(false);
 
       // 异步获取AI生成的内容
