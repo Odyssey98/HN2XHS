@@ -6,7 +6,7 @@ import { getStory, HNStory } from '../../services/hackerNewsService';
 import { convertToXiaohongshu, XiaohongshuPost } from '../../services/conversionService';
 import { Toast } from '@/components/Toast';
 import SkeletonXHS from '@/components/SkeletonXHS';
-import { getGeneratedContent } from '../../services/databaseService';
+import { GeneratedContent, getGeneratedContent, saveGeneratedContent } from '../../services/databaseService';
 
 const PostPage = () => {
   const router = useRouter();
@@ -24,26 +24,30 @@ const PostPage = () => {
 
   const fetchPost = async (postId: number) => {
     try {
-      const story = await getStory(postId);
-      if (!story) {
-        setError('文章未找到');
-        return;
-      }
-
       const generatedContent = await getGeneratedContent(postId);
       if (generatedContent) {
-        setPost({
-          ...story,
-          ...generatedContent,
-        });
+        const story = await getStory(postId);
+        if (story) {
+          setPost({
+            ...story,
+            ...generatedContent,
+          });
+        } else {
+          setError('文章未找到');
+        }
       } else {
-        const convertedPost = await convertToXiaohongshu(story);
-        setPost({
-          ...convertedPost,
-          imageUrl: story.imageUrl,
-        });
-        // 如果没有预生成的内容，则实时生成
-        fetchAIContent(story);
+        const story = await getStory(postId);
+        if (story) {
+          const convertedPost = await convertToXiaohongshu(story);
+          setPost({
+            ...convertedPost,
+            imageUrl: story.imageUrl,
+          });
+          // 如果没有预生成的内容，则实时生成并保存
+          fetchAIContent(story);
+        } else {
+          setError('文章未找到');
+        }
       }
       setLoading(false);
     } catch (err) {
@@ -61,14 +65,25 @@ const PostPage = () => {
         body: JSON.stringify(story),
       });
       const aiContent = await response.json();
-      setPost(prevPost => ({
-        ...prevPost!,
-        title: aiContent.title ?? prevPost!.title,
-        tags: aiContent.tags ?? prevPost!.tags,
-        imageDescription: aiContent.imageDescription ?? prevPost!.imageDescription,
-        imageUrl: aiContent.imageUrl ?? prevPost!.imageUrl,
-        content: aiContent.content ?? prevPost!.content,
-      }));
+      const updatedPost = {
+        ...story,
+        title: aiContent.title ?? story.title,
+        tags: aiContent.tags ?? [],
+        imageDescription: aiContent.imageDescription ?? '',
+        imageUrl: aiContent.imageUrl ?? story.imageUrl,
+        content: aiContent.content ?? '',
+      };
+      setPost(updatedPost);
+
+      // 保存生成的内容到数据库
+      const contentToSave: GeneratedContent = {
+        title: updatedPost.title,
+        tags: updatedPost.tags,
+        imageDescription: updatedPost.imageDescription,
+        imageUrl: updatedPost.imageUrl,
+        content: updatedPost.content,
+      };
+      await saveGeneratedContent(story.id, contentToSave);
     } catch (err) {
       console.error('Error fetching AI content:', err);
     }

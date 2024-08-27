@@ -1,15 +1,19 @@
 import { kv } from '@vercel/kv';
 
-interface GeneratedContent {
+export interface GeneratedContent {
   title: string;
   tags: string[];
   imageDescription: string;
-  imageUrl: string;
+  imageUrl: string | undefined; 
   content: string;
 }
 
 export async function saveGeneratedContent(id: number, content: GeneratedContent) {
-  await kv.set(`story:${id}`, JSON.stringify(content));
+  const contentToSave = {
+    ...content,
+    imageUrl: content.imageUrl || '' // 如果 imageUrl 是 undefined，保存为空字符串
+  };
+  await kv.set(`story:${id}`, JSON.stringify(contentToSave));
 }
 
 export async function getGeneratedContent(id: number): Promise<GeneratedContent | null> {
