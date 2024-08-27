@@ -2,25 +2,21 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['ui-avatars.com', 'i.pravatar.cc', 'picsum.photos'],
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'ui-avatars.com',
+        pathname: '/api/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'i.pravatar.cc',
-        port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'picsum.photos',
-        port: '',
         pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'ui-avatars.com',
-        port: '',
-        pathname: '/api/**',
       },
     ],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -36,13 +32,13 @@ const nextConfig = {
     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
   },
   experimental: {
-    largePageDataBytes: 128 * 100000, // 增加页面数据大小限制
+    largePageDataBytes: 128 * 100000,
   },
   async rewrites() {
     return [
       {
         source: '/api/proxy-image/:path*',
-        destination: 'https://:path*',
+        destination: 'https://picsum.photos/:path*',
       },
     ];
   },

@@ -136,8 +136,8 @@ const Home: NextPage<HomeProps> = ({ initialPosts }) => {
                       <Image
                         src={post.imageUrl || placeholderImg}
                         alt={post.title}
-                        layout="fill"
-                        objectFit="cover"
+                        fill
+                        style={{ objectFit: 'cover' }}
                         placeholder="blur"
                         blurDataURL={placeholderImg.blurDataURL}
                       />

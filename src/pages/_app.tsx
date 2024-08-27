@@ -2,6 +2,7 @@ import type { AppProps } from 'next/app';
 import Layout from '../components/Layout';
 import '../styles/globals.css';
 import Head from 'next/head';
+import { Analytics } from '@vercel/analytics/react';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -12,6 +13,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta name="keywords" content="Hacker News, 小红书, 科技资讯, 内容转换" />
       </Head>
       <Component {...pageProps} />
+      <Analytics />
     </Layout>
   );
 }
