@@ -6,6 +6,7 @@ import { getStory, HNStory } from '../../services/hackerNewsService';
 import { convertToXiaohongshu, XiaohongshuPost } from '../../services/conversionService';
 import { Toast } from '@/components/Toast';
 import SkeletonXHS from '@/components/SkeletonXHS';
+import { getGeneratedContent } from '../../services/databaseService';
 
 const PostPage = () => {
   const router = useRouter();
@@ -29,17 +30,24 @@ const PostPage = () => {
         return;
       }
 
-      const convertedPost = await convertToXiaohongshu(story);
-      setPost({
-        ...convertedPost,
-        imageUrl: story.imageUrl, // 使用从服务层获取的 imageUrl
-      });
+      const generatedContent = await getGeneratedContent(postId);
+      if (generatedContent) {
+        setPost({
+          ...story,
+          ...generatedContent,
+        });
+      } else {
+        const convertedPost = await convertToXiaohongshu(story);
+        setPost({
+          ...convertedPost,
+          imageUrl: story.imageUrl,
+        });
+        // 如果没有预生成的内容，则实时生成
+        fetchAIContent(story);
+      }
       setLoading(false);
-
-      // 异步获取AI生成的内容
-      fetchAIContent(story);
     } catch (err) {
-      console.error('Error fetching story:', err);
+      console.error('获取文章时发生错误:', err);
       setError('获取文章时发生错误');
       setLoading(false);
     }

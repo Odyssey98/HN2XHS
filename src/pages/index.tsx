@@ -7,6 +7,7 @@ import { getTopStories, HNStory } from '@/services/hackerNewsService';
 import SkeletonHN from '@/components/SkeletonHN';
 import AvatarGenerator from '@/components/AvatarGenerator';
 import placeholderImg from '../../public/images/placeholder.jpg'
+import { initializeTopStories } from '@/services/hackerNewsService';
 
 interface EnhancedPost {
   id: number;
@@ -202,6 +203,7 @@ const Home: NextPage<HomeProps> = ({ initialPosts }) => {
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
+    await initializeTopStories();
     const stories = await getTopStories(ITEMS_PER_PAGE, 0);
     const initialPosts = stories.map(enhancePost).map(post => ({
       ...post,
@@ -211,7 +213,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       props: {
         initialPosts,
       },
-      revalidate: 60 * 60 * 24,
+      revalidate: 60 * 60, // 每小时重新生成页面
     };
   } catch (error) {
     console.error('获取初始帖子时出错:', error);
@@ -219,7 +221,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       props: {
         initialPosts: [],
       },
-      revalidate: 60 * 60 * 24,
+      revalidate: 60 * 60,
     };
   }
 };

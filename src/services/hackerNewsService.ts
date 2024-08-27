@@ -77,3 +77,27 @@ export const getStory = async (id: number): Promise<HNStory | null> => {
 
   return story;
 };
+
+
+export const getTopStoryIds = async (limit: number = 30): Promise<number[]> => {
+  try {
+    const storyIds = await fetchTopStoryIds();
+    return storyIds.slice(0, limit);
+  } catch (error) {
+    console.error('获取热门故事ID时出错:', error);
+    return [];
+  }
+};
+
+export const initializeTopStories = async () => {
+  const cacheKey = 'daily_top_stories';
+  let cachedStories = await kv.get<HNStory[]>(cacheKey);
+
+  if (!cachedStories) {
+    const storyIds = await fetchTopStoryIds();
+    cachedStories = await fetchAndCacheStories(storyIds.slice(0, TOP_STORIES_COUNT));
+    await kv.set(cacheKey, cachedStories, { ex: DAILY_CACHE_DURATION });
+  }
+
+  return cachedStories;
+};
