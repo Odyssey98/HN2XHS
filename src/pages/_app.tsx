@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import '../styles/globals.css';
 import Head from 'next/head';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -14,6 +15,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       </Head>
       <Component {...pageProps} />
       <Analytics />
+      <SpeedInsights />
     </Layout>
   );
 }
