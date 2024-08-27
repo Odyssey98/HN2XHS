@@ -105,7 +105,7 @@ const PostPage = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen flex items-center justify-center p-2">
+    <div className="bg-white min-h-screen flex items-center justify-center p-2 sm:p-4">
       <Head>
         <title>{post.title} - HN转小红书</title>
         <meta name="description" content={post.content ? post.content.slice(0, 160) : ''} />
@@ -115,8 +115,8 @@ const PostPage = () => {
         </script>
       </Head>
 
-      <main className="w-full max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden flex flex-col">
-        <div className="p-3 lg:p-4 flex flex-col">
+      <main className="w-full max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="p-3 sm:p-4 flex flex-col h-full sm:h-auto">
           <div className="flex items-center mb-2">
             <div className="w-8 h-8 rounded-full mr-2 overflow-hidden">
               <Image
@@ -135,9 +135,9 @@ const PostPage = () => {
             </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row">
-            <div className="lg:w-1/2 mb-2 lg:mb-0 lg:mr-3 flex-shrink-0">
-              <div className="relative w-full h-0 pb-[75%]">
+          <div className="flex flex-col sm:flex-row flex-grow overflow-hidden">
+            <div className="w-full sm:w-1/2 mb-4 sm:mb-0 sm:mr-3 flex-shrink-0"> 
+              <div className="relative w-full h-64 sm:h-[400px]">
                 {post.imageUrl ? (
                   <Image
                     src={post.imageUrl}
@@ -151,23 +151,21 @@ const PostPage = () => {
                 )}
               </div>
             </div>
-            <div className="lg:w-1/2 flex flex-col">
-              <div className="overflow-y-auto max-h-[250px]">
-                <h1
-                  className="text-lg lg:text-xl font-bold mb-2 cursor-pointer hover:text-blue-600"
-                  onClick={() => copyToClipboard(post.title)}
+            <div className="w-full sm:w-1/2 flex flex-col">
+              <h1
+                className="text-lg sm:text-xl font-bold mb-2 cursor-pointer hover:text-blue-600 line-clamp-2"
+                onClick={() => copyToClipboard(post.title)}
+              >
+                {post.title}
+              </h1>
+              {post.content && (
+                <p
+                  className="text-sm text-gray-700 mb-2 cursor-pointer hover:text-blue-600 overflow-y-auto flex-grow"
+                  onClick={() => copyToClipboard(post.content)}
                 >
-                  {post.title}
-                </h1>
-                {post.content && (
-                  <p
-                    className="text-sm text-gray-700 mb-2 cursor-pointer hover:text-blue-600"
-                    onClick={() => copyToClipboard(post.content)}
-                  >
-                    {post.content}
-                  </p>
-                )}
-              </div>
+                  {post.content}
+                </p>
+              )}
             </div>
           </div>
 
@@ -183,7 +181,7 @@ const PostPage = () => {
             ))}
           </div>
 
-          <div className="flex justify-between items-center text-gray-500 text-xs mt-1">
+          <div className="flex justify-between items-center text-gray-500 text-xs mt-4">
             <div className="flex items-center">
               <a
                 href={post.url}
