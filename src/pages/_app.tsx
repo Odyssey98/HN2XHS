@@ -16,6 +16,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <Component {...pageProps} />
       <Analytics />
       <SpeedInsights />
+      <script async src="https://cdn.seline.so/seline.js"></script>
     </Layout>
   );
 }
